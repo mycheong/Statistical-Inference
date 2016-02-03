@@ -1,0 +1,79 @@
+---
+title: "Appendix"
+output: pdf_document
+---
+
+\section{R code of Statistical Inference course project part 2}
+
+```{r, echo=TRUE, eval=FALSE}
+## Part 2
+## 
+library(datasets)
+data("ToothGrowth")
+w<-aggregate(ToothGrowth$len, by=list(ToothGrowth$supp, ToothGrowth$dose),FUN=mean)
+v<-aggregate(ToothGrowth$len, by=list(ToothGrowth$dose, ToothGrowth$supp),FUN=mean)
+
+## These plots compares the effects of orange juice supplement 
+## and vitamin C supplement on tooth growth.
+par(mfcol=c(1,2))
+plot(ToothGrowth$dose[which(ToothGrowth$supp=="OJ")], 
+     ToothGrowth$len[which(ToothGrowth$supp=="OJ")], 
+     xlab="Dose level (mg/day)", ylab="Tooth growth",
+     main="Effect of dose level of orange juice",
+     cex.main = 0.8, ylim=c(5,40))
+lines(w$Group.2[which(w$Group.1=="OJ")], 
+      w$x[which(w$Group.1=="OJ")], col="blue")
+
+plot(ToothGrowth$dose[which(ToothGrowth$supp=="VC")], 
+     ToothGrowth$len[which(ToothGrowth$supp=="VC")], 
+     xlab="Dose level (mg/day)", ylab="Tooth growth",
+     main="Effect of dose level of vitamin C",
+     cex.main = 0.8, ylim=c(5,40))
+lines(w$Group.2[which(w$Group.1=="VC")], 
+      w$x[which(w$Group.1=="VC")], col="blue")
+
+## Use t.test to examine the 95% confidence interval of 
+## assuming that OJ is more effective than VC when 0.5  mg/day dose is used
+##
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 0.5),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 0.5),]
+t.test(g1$len, g2$len, paired = F, var.equal = F)$conf
+
+## Use t.test to examine the 95% confidence interval of 
+## assuming that OJ is more effective than VC when 1 mg/day dose is used
+##
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 1),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 1),]
+t.test(g1$len, g2$len, paired = F, var.equal = F)$conf
+
+## Use t.test to examine the 95% confidence interval of 
+## assuming that OJ is more effective than VC when 2 mg/day dose is used
+##
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 2),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 2),]
+t.test(g1$len, g2$len, paired = F)$conf
+
+## From each individual supplement, the plot shows and upward trend 
+## in tooth growth when the supplement dose level is increased.
+## 
+## Orange juice dose 1 and 0.5
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 1),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 0.5),]
+t.test(g1$len, g2$len, paired = F)$conf
+
+## Orange juice dose 2 and 1
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 2),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 1),]
+t.test(g1$len, g2$len, paired = F)$conf
+
+## VC dose 1 and 0.5
+g1<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 1),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 0.5),]
+t.test(g1$len, g2$len, paired = F)$conf
+
+##VC dose 2 and 1
+g1<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 2),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 1),]
+t.test(g1$len, g2$len, paired = F)$conf
+
+```

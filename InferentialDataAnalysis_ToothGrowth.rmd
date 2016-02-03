@@ -1,0 +1,146 @@
+---
+title: "Inferential Data Analysis : Infuence of Vitamin C on tooth growth"
+author: "M. Y. Cheong"
+date: "December 27, 2015"
+fontsize: 12
+---
+##Introduction
+
+This basic inferential data analysis project uses the ToothGrowth data in the R dataset package. First, a basic exploratory data analysis is done to understand the basic feature of the data. Then, **confidence interval** is used to compare how tooth growth is affected by the supplement delivery methods (orange juice vs. ascorbic acid) and the dose level per day. 
+
+
+##Exploratory data analysis and summary
+
+The ToothGrowth data contains the data measuring the tooth growth of 60 Guinea pigs in response to vitamin C. Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, (orange juice or ascorbic acid (a form of vitamin C and coded as VC). (See reference here :   http://jn.nutrition.org/content/33/5/491.full.pdf)
+
+The data contains 60 objects of 3 variables, *len*, *supp* and *dose*. There are 3 dose levels, i.e., 0.5, 1 and 2.  
+```{r, echo=F, eval=TRUE}
+library(datasets)
+data("ToothGrowth")
+```
+```{r, echo=TRUE, eval=TRUE}
+str(ToothGrowth)
+unique(ToothGrowth$dose)
+
+```
+
+Below is the plot of dose level vs. tooth growth grouped by supplement type, i.e., orange juice (OJ) and vitamin C tablet (VC). Each circle in the plots represents a guinea pig under test. The blue line shows the mean of tooth growth value at each dose level. 
+
+From the plot it seems that on average OJ is more effective than VC. Although at dose level 2 mg/day, the difference is not clear. Another observation is that when dose level is increased, tooth growth seems to increase as well in both supplement. 
+
+```{r, echo=FALSE, eval=TRUE}
+## Part 2
+## 
+#library(datasets)
+#data("ToothGrowth")
+w<-aggregate(ToothGrowth$len, 
+             by=list(ToothGrowth$supp, ToothGrowth$dose), 
+             FUN=mean)
+
+v<-aggregate(ToothGrowth$len, 
+             by=list(ToothGrowth$dose, ToothGrowth$supp), 
+             FUN=mean)
+
+par(mfcol=c(1,2))
+plot(ToothGrowth$dose[which(ToothGrowth$supp=="OJ")], 
+     ToothGrowth$len[which(ToothGrowth$supp=="OJ")], 
+     xlab="Dose level (mg/day)", ylab="Tooth growth",
+     main="Effect of dose level of orange juice",
+     cex.main = 0.8, cex.lab =0.8, ylim=c(5,40))
+lines(w$Group.2[which(w$Group.1=="OJ")], 
+      w$x[which(w$Group.1=="OJ")], col="blue")
+
+plot(ToothGrowth$dose[which(ToothGrowth$supp=="VC")], 
+     ToothGrowth$len[which(ToothGrowth$supp=="VC")], 
+     xlab="Dose level (mg/day)", ylab="Tooth growth",
+     main="Effect of dose level of vitamin C",
+     cex.main = 0.8, cex.lab=0.8, ylim=c(5,40))
+lines(w$Group.2[which(w$Group.1=="VC")], 
+      w$x[which(w$Group.1=="VC")], col="blue")
+```
+
+##Compare tooth growth by supplement delivery methods and dose levels
+
+Base on the plots above, the following questions is addressed using inferential data analysis by confidence interval. 
+
+1. Is orange juice more effective than ascorbic acid (Vit. C) in promoting tooth growth?
+2. Does increasing dose level of the supplement improve tooth growth?
+
+The confidence interval for the comparisons are calculated using the R function t.test(). \
+
+
+### Is orange juice more effective than vitamin C for tooth growth?
+
+To answer this, we compare the tooth growth of two groups of quinea pigs that are given orange juice and vitamin C, respectively of same dose level. It is assumed that the tooth growth of the two groups are roughly normally distribted and independent t.test is performed with var.equal=F.   
+
+The 95% confidence interval is calclated for tooth growth difference between guinea pigs given orange juice and guinea pigs given vitamin C.
+
+Comparing OJ and VC at **dose level 0.5**, the confidence interval is
+```{r, echo=F, eval=T}
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 0.5 ),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 0.5 ),]
+t.test(g1$len, g2$len, paired = F, var.equal = F)$conf
+```
+\
+Comparing OJ and VC at **dose level 1**, the confidence interval is
+```{r, echo=F, eval=T}
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 1 ),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 1 ),]
+t.test(g1$len, g2$len, paired = F, var.equal = F)$conf
+```
+\
+Comparing OJ and VC at **dose level 2**, the confidence interval is
+```{r, echo=F, eval=T}
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 2 ),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 2 ),]
+t.test(g1$len, g2$len, paired = F, var.equal = F)$conf
+```
+\
+**Conclusions**: 
+For dose level 0.5 and 1, we see that the confidence interval are in the positive side. Thus, we conclude that orange juice is more effective than vitamin C in promoting tooth growth.
+
+However, for dose level 2, the confidence interval ranges from -3.79807 to 3.63807. This range indicates that tooth growth of orange juice supplemented guinea pig can have less tooth growth than vitamin C supplemented guinea pig in some cases. Thus, for dose level 2, we cannot conclude that orange juice is more effective than vitamin C. 
+\
+\
+
+
+### Does increasing the dose level improve tooth growth?
+
+To answer this, we compare the tooth growth of quinea pigs that are given orange juice dose level 0.5 and 1, and then dose level 1 and 2. Then the same compariosn test is repeated for guinea pigs given vitamin C. 
+
+It is assumed that the tooth growth of the two comparing groups are roughly normally distribted and independent t.test is performed with var.equal=F.   
+
+**Comparing orange juice dose levels 0.5 to 1**
+```{r, echo=F, eval=T}
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 1),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 0.5),]
+t.test(g1$len, g2$len, paired = F)$conf
+```
+\
+**Comparing orange juice dose levels 1 to 2**
+```{r, echo=F, eval=T}
+g1<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 2),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="OJ" & ToothGrowth$dose == 1),]
+t.test(g1$len, g2$len, paired = F)$conf
+```
+\
+**Comparing vitamin C dose levels 0.5 to 1**
+```{r, echo=F, eval=T}
+g1<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 1),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 0.5),]
+t.test(g1$len, g2$len, paired = F)$conf
+```
+\
+**Comparing vitamin C dose levels 1 and 2**
+```{r, echo=F, eval=T}
+g1<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 2),]
+g2<- ToothGrowth[which(ToothGrowth$supp=="VC" & ToothGrowth$dose == 1),]
+t.test(g1$len, g2$len, paired = F)$conf
+```
+\
+**Conclusions**: 
+In all comparisons of higher dose level to a lower dose level of supplement groups, we see that confidence intervals of all four comparison fall in the positive range. Thus, we conclude with 95% of confidence that the by increasing the suplement dose level, tooth growth can be improved.  
+
+\
+\
+\
